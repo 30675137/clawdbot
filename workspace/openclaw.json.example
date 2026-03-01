@@ -1,4 +1,4 @@
-// OpenClaw Gateway Configuration for Digital Assistant
+// OpenClaw Gateway Configuration for 飞小助 (feixiaozhu)
 // Copy this file to ~/.openclaw/openclaw.json (inside container: /home/node/.openclaw/openclaw.json)
 // Or mount it via docker volume
 {
@@ -11,16 +11,16 @@
   "agents": {
     "list": [
       {
-        "id": "digital-assistant",
-        "name": "团队助手",
-        "workspace": "~/.openclaw/workspace-digital-assistant",
+        "id": "feixiaozhu",
+        "name": "飞小助",
+        "workspace": "~/.openclaw/workspace-feixiaozhu",
         "model": "dashscope/qwen3.5-plus"
       }
     ]
   },
   "bindings": [
     {
-      "agentId": "digital-assistant",
+      "agentId": "feixiaozhu",
       "match": {
         "channel": "feishu"
       }

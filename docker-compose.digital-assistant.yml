@@ -1,14 +1,14 @@
-# Docker Compose for Digital Assistant
+# Docker Compose for 飞小助 (feixiaozhu)
 # Usage: docker compose -f docker-compose.digital-assistant.yml up -d
 
 services:
   openclaw-gateway:
     build: .
-    container_name: openclaw-digital-assistant
+    container_name: openclaw-feixiaozhu
     restart: unless-stopped
     volumes:
-      - openclaw-data:/home/node/.openclaw
-      - ./workspace:/home/node/.openclaw/workspace-digital-assistant
+      - /Volumes/macpro_data/openclaw_data/feixiaozhu:/home/node/.openclaw
+      - ./workspace:/home/node/.openclaw/workspace-feixiaozhu
     environment:
       - HOME=/home/node
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
@@ -25,6 +25,3 @@ services:
         "18789",
         "--force",
       ]
-
-volumes:
-  openclaw-data:

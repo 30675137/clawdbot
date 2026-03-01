@@ -1,4 +1,4 @@
-# 飞书团队数字助手 — 部署指南
+# 飞小助 — 飞书团队数字助手部署指南
 
 ## 前置条件
 
@@ -39,10 +39,10 @@ docker compose -f docker-compose.digital-assistant.yml up -d
 
 # 将配置复制到容器中
 docker cp workspace/openclaw.json.example \
-  openclaw-digital-assistant:/home/node/.openclaw/openclaw.json
+  openclaw-feixiaozhu:/home/node/.openclaw/openclaw.json
 
 # 编辑容器内的配置文件，替换 App ID 和 App Secret
-docker exec -it openclaw-digital-assistant sh -c \
+docker exec -it openclaw-feixiaozhu sh -c \
   "sed -i 's/YOUR_FEISHU_APP_ID/'$FEISHU_APP_ID'/g; s/YOUR_FEISHU_APP_SECRET/'$FEISHU_APP_SECRET'/g' /home/node/.openclaw/openclaw.json"
 
 # 重启容器使配置生效
@@ -53,7 +53,7 @@ docker compose -f docker-compose.digital-assistant.yml restart
 
 ```bash
 # 查看日志
-docker logs -f openclaw-digital-assistant
+docker logs -f openclaw-feixiaozhu
 
 # 应该看到：
 # - Gateway started
@@ -64,7 +64,7 @@ docker logs -f openclaw-digital-assistant
 
 1. 在飞书中找到机器人，发送私聊消息测试
 2. 将机器人拉入群聊，@机器人 发送消息测试
-3. 发送"帮我创建一个任务 测试数字助手 截止明天"测试任务功能
+3. 发送"帮我创建一个任务 测试飞小助 截止明天"测试任务功能
 
 ## 多维表格设置
 
