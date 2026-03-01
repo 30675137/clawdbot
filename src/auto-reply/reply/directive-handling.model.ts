@@ -8,7 +8,11 @@ import {
 } from "../../agents/model-selection.js";
 import type { OpenClawConfig } from "../../config/config.js";
 import type { SessionEntry } from "../../config/sessions.js";
-import { buildBrowseProvidersButton } from "../../telegram/model-buttons.js";
+import {
+  buildBrowseProvidersButton,
+  buildQuickPickKeyboard,
+  type QuickPickModel,
+} from "../../telegram/model-buttons.js";
 import { shortenHomePath } from "../../utils.js";
 import { resolveSelectedAndActiveModel } from "../model-runtime.js";
 import type { ReplyPayload } from "../types.js";
@@ -248,14 +252,26 @@ export async function maybeHandleModelDirectiveInfo(params: {
       : null;
 
     if (isTelegram) {
-      const buttons = buildBrowseProvidersButton();
+      // Build quick-pick buttons from the configured model catalog
+      const quickPickModels: QuickPickModel[] = pickerCatalog.map((entry) => ({
+        provider: entry.provider,
+        model: entry.id,
+        name: entry.name,
+      }));
+      const quickPickRows = buildQuickPickKeyboard({
+        models: quickPickModels,
+        currentModel: current,
+      });
+      const browseRow = buildBrowseProvidersButton();
+      const buttons = [...quickPickRows, ...browseRow];
+
       return {
         text: [
           `Current: ${current}${modelRefs.activeDiffers ? " (selected)" : ""}`,
           activeRuntimeLine,
           "",
-          "Tap below to browse models, or use:",
-          "/model <provider/model> to switch",
+          quickPickModels.length > 0 ? "Tap to switch:" : null,
+          "/model <name> to switch",
           "/model status for details",
         ]
           .filter(Boolean)
@@ -264,13 +280,21 @@ export async function maybeHandleModelDirectiveInfo(params: {
       };
     }
 
+    // Non-Telegram: show model list as text
+    const modelHints = pickerCatalog
+      .slice(0, 5)
+      .map((e) => `  ${e.provider}/${e.id}`)
+      .join("\n");
+
     return {
       text: [
         `Current: ${current}${modelRefs.activeDiffers ? " (selected)" : ""}`,
         activeRuntimeLine,
         "",
+        pickerCatalog.length > 0 ? `Available:\n${modelHints}` : null,
+        "",
         "Switch: /model <provider/model>",
-        "Browse: /models (providers) or /models <provider> (models)",
+        "Browse: /models",
         "More: /model status",
       ]
         .filter(Boolean)
