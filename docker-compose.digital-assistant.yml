@@ -8,7 +8,6 @@ services:
     restart: unless-stopped
     volumes:
       - /Volumes/macpro_data/openclaw_data/feixiaozhu:/home/node/.openclaw
-      - ./workspace:/home/node/.openclaw/workspace-feixiaozhu
     environment:
       - HOME=/home/node
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
