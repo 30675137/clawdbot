@@ -6,7 +6,19 @@
     "mode": "local"
   },
   "models": {
-    "default": "dashscope/qwen3.5-plus"
+    "providers": {
+      "dashscope": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "YOUR_DASHSCOPE_API_KEY",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen-plus",
+            "name": "Qwen Plus"
+          }
+        ]
+      }
+    }
   },
   "agents": {
     "list": [
@@ -14,7 +26,7 @@
         "id": "feixiaozhu",
         "name": "飞小助",
         "workspace": "~/.openclaw/workspace-feixiaozhu",
-        "model": "dashscope/qwen3.5-plus"
+        "model": "dashscope/qwen-plus"
       }
     ]
   },
