@@ -159,9 +159,7 @@ describe("directive behavior", () => {
       const unavailableCatalogText = await runModelDirectiveText(home, "/model");
       expect(unavailableCatalogText).toContain("Current: anthropic/claude-opus-4-5");
       expect(unavailableCatalogText).toContain("Switch: /model <provider/model>");
-      expect(unavailableCatalogText).toContain(
-        "Browse: /models (providers) or /models <provider> (models)",
-      );
+      expect(unavailableCatalogText).toContain("Browse: /models");
       expect(unavailableCatalogText).toContain("More: /model status");
 
       const allowlistedStatusText = await runModelDirectiveText(home, "/model status", {
