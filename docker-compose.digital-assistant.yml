@@ -1,0 +1,30 @@
+# Docker Compose for Digital Assistant
+# Usage: docker compose -f docker-compose.digital-assistant.yml up -d
+
+services:
+  openclaw-gateway:
+    build: .
+    container_name: openclaw-digital-assistant
+    restart: unless-stopped
+    volumes:
+      - openclaw-data:/home/node/.openclaw
+      - ./workspace:/home/node/.openclaw/workspace-digital-assistant
+    environment:
+      - HOME=/home/node
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
+    ports:
+      - "${GATEWAY_PORT:-18789}:18789"
+    command:
+      [
+        "node",
+        "openclaw.mjs",
+        "gateway",
+        "--bind",
+        "loopback",
+        "--port",
+        "18789",
+        "--force",
+      ]
+
+volumes:
+  openclaw-data:
