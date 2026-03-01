@@ -275,6 +275,37 @@ export function buildModelAliasIndex(params: {
     byKey.set(key, existing);
   }
 
+  // Auto-generate short aliases from model IDs.
+  // First pass: collect all parsed refs and count model ID occurrences to detect collisions.
+  const parsedRefs: { ref: ModelRef; raw: string }[] = [];
+  const modelIdCounts = new Map<string, number>();
+  for (const keyRaw of Object.keys(rawModels)) {
+    const parsed = parseModelRef(String(keyRaw ?? ""), params.defaultProvider);
+    if (!parsed) {
+      continue;
+    }
+    parsedRefs.push({ ref: parsed, raw: keyRaw });
+    const normalizedModel = normalizeAliasKey(parsed.model);
+    modelIdCounts.set(normalizedModel, (modelIdCounts.get(normalizedModel) ?? 0) + 1);
+  }
+
+  // Second pass: register auto-aliases, never overwriting explicit aliases.
+  for (const { ref } of parsedRefs) {
+    const bareAlias = normalizeAliasKey(ref.model);
+    const isAmbiguous = (modelIdCounts.get(bareAlias) ?? 0) > 1;
+
+    if (!isAmbiguous && !byAlias.has(bareAlias)) {
+      byAlias.set(bareAlias, { alias: ref.model, ref });
+    }
+
+    if (isAmbiguous) {
+      const prefixedAlias = normalizeAliasKey(`${ref.provider}-${ref.model}`);
+      if (!byAlias.has(prefixedAlias)) {
+        byAlias.set(prefixedAlias, { alias: `${ref.provider}-${ref.model}`, ref });
+      }
+    }
+  }
+
   return { byAlias, byKey };
 }
 
