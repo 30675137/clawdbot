@@ -190,6 +190,53 @@ export function buildBrowseProvidersButton(): ButtonRow[] {
   return [[{ text: "Browse providers", callback_data: "mdl_prov" }]];
 }
 
+export type QuickPickModel = {
+  provider: string;
+  model: string;
+  name?: string;
+};
+
+/**
+ * Build quick-pick inline keyboard showing configured models.
+ * Two models per row. Active model gets a checkmark.
+ */
+export function buildQuickPickKeyboard(params: {
+  models: QuickPickModel[];
+  currentModel?: string;
+}): ButtonRow[] {
+  const { models, currentModel } = params;
+  if (models.length === 0) {
+    return [];
+  }
+
+  const rows: ButtonRow[] = [];
+  let currentRow: ButtonRow = [];
+
+  for (const m of models) {
+    const key = `${m.provider}/${m.model}`;
+    const callbackData = `mdl_sel_${key}`;
+    if (Buffer.byteLength(callbackData, "utf8") > MAX_CALLBACK_DATA_BYTES) {
+      continue;
+    }
+    const isCurrent = currentModel === key;
+    const label = m.name ?? m.model;
+    const displayText = truncateModelId(label, 18);
+    const text = isCurrent ? `${displayText} ✓` : displayText;
+
+    currentRow.push({ text, callback_data: callbackData });
+    if (currentRow.length === 2) {
+      rows.push(currentRow);
+      currentRow = [];
+    }
+  }
+
+  if (currentRow.length > 0) {
+    rows.push(currentRow);
+  }
+
+  return rows;
+}
+
 /**
  * Truncate model ID for display, preserving end if too long.
  */
