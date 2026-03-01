@@ -1,0 +1,50 @@
+// OpenClaw Gateway Configuration for Digital Assistant
+// Copy this file to ~/.openclaw/openclaw.json (inside container: /home/node/.openclaw/openclaw.json)
+// Or mount it via docker volume
+{
+  "gateway": {
+    "mode": "local"
+  },
+  "models": {
+    "default": "dashscope/qwen3.5-plus"
+  },
+  "agents": {
+    "list": [
+      {
+        "id": "digital-assistant",
+        "name": "团队助手",
+        "workspace": "~/.openclaw/workspace-digital-assistant",
+        "model": "dashscope/qwen3.5-plus"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "digital-assistant",
+      "match": {
+        "channel": "feishu"
+      }
+    }
+  ],
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "dmPolicy": "open",
+      "groupPolicy": "open",
+      "requireMention": true,
+      "accounts": {
+        "main": {
+          "appId": "YOUR_FEISHU_APP_ID",
+          "appSecret": "YOUR_FEISHU_APP_SECRET"
+        }
+      },
+      "tools": {
+        "doc": true,
+        "wiki": true,
+        "drive": true,
+        "perm": false,
+        "scopes": true
+      }
+    }
+  }
+}
