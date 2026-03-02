@@ -1,4 +1,4 @@
-// OpenClaw Gateway Configuration
+// OpenClaw Gateway Configuration for 飞小助 (feixiaozhu)
 // Copy this file to ~/.openclaw/openclaw.json (inside container: /home/node/.openclaw/openclaw.json)
 // Or mount it via docker volume
 {
@@ -43,11 +43,6 @@
         "id": "feixiaozhu",
         "name": "飞小助",
         "workspace": "~/.openclaw/workspace-feixiaozhu"
-      },
-      {
-        "id": "obsidian-openclaw",
-        "name": "知识库助手",
-        "workspace": "~/.openclaw/workspace-obsidian-openclaw"
       }
     ]
   },
@@ -55,15 +50,7 @@
     {
       "agentId": "feixiaozhu",
       "match": {
-        "channel": "feishu",
-        "account": "main"
-      }
-    },
-    {
-      "agentId": "obsidian-openclaw",
-      "match": {
-        "channel": "feishu",
-        "account": "obsidian"
+        "channel": "feishu"
       }
     }
   ],
@@ -77,10 +64,6 @@
         "main": {
           "appId": "YOUR_FEISHU_APP_ID",
           "appSecret": "YOUR_FEISHU_APP_SECRET"
-        },
-        "obsidian": {
-          "appId": "YOUR_OBSIDIAN_BOT_APP_ID",
-          "appSecret": "YOUR_OBSIDIAN_BOT_APP_SECRET"
         }
       },
       "tools": {
