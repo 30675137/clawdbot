@@ -7,15 +7,14 @@ services:
   openclaw-gateway:
     build: .
     container_name: openclaw-obsidian-openclaw
+    env_file:
+      - .env
+      - .env.obsidian-openclaw
     restart: unless-stopped
     volumes:
-      - /Volumes/macpro_data/openclaw_data/obsidian-openclaw:/home/node/.openclaw
-      - /Volumes/macpro_data/知识库/数字助理知识库:/home/node/obsidian-vault
+      - /Volumes/macpro_data/openclaw_data/obsidian-openclaw:/home/node
     environment:
       - HOME=/home/node
-      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-      - ANTHROPIC_BASE_URL=${ANTHROPIC_BASE_URL}
     ports:
       - "${OBSIDIAN_GATEWAY_PORT:-18790}:18790"
     command:
