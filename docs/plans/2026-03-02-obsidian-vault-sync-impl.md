@@ -2,11 +2,11 @@
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Create an OpenClaw workspace skill that automatically saves Feishu messages into an Obsidian vault and syncs via Git to GitHub.
+**Goal:** Create a dedicated OpenClaw agent ("知识库助手") with独立飞书机器人, automatically saving Feishu messages into an Obsidian vault and syncing via Git to GitHub.
 
-**Architecture:** A Markdown skill file loaded into the Feishu agent's system prompt. The skill instructs the agent to analyze incoming messages, convert them to Obsidian-format Markdown with frontmatter, write to the local vault using the `write` tool, and run `git add/commit/push` via the `exec` tool. No new TypeScript code or plugin changes needed — pure skill-driven.
+**Architecture:** A standalone agent `obsidian-openclaw` with its own Feishu bot application, workspace, and skill. The `obsidian-vault` skill instructs the agent to analyze incoming messages, convert them to Obsidian-format Markdown with frontmatter, write to the local vault using the `write` tool, and run `git add/commit/push` via the `exec` tool.
 
-**Tech Stack:** OpenClaw skill system (Markdown), Feishu extension tools (`feishu_doc`), agent coding tools (`read`, `write`, `exec`), Git, GitHub.
+**Tech Stack:** OpenClaw agent + skill system (Markdown), Feishu extension (dedicated bot account), agent coding tools (`read`, `write`, `exec`), Git, GitHub.
 
 ---
 
@@ -59,11 +59,6 @@ cd ~/obsidian-vault
 git init
 git add -A
 git commit -m "vault: initial structure"
-```
-
-Then create a GitHub repo (private) and push:
-
-```bash
 gh repo create obsidian-vault --private --source=. --remote=origin --push
 ```
 
@@ -75,8 +70,6 @@ cd ~/obsidian-vault && git remote -v && git log --oneline
 
 Expected: remote pointing to GitHub, one initial commit.
 
-**Step 6: Commit** — N/A (no changes to clawdbot repo)
-
 ---
 
 ### Task 2: Write the obsidian-vault Skill
@@ -85,205 +78,175 @@ Expected: remote pointing to GitHub, one initial commit.
 
 - Create: `workspace/skills/obsidian-vault.md`
 
-**Step 1: Write the skill file**
+Write the skill file that instructs the agent on the full workflow: content type identification, fetching (feishu_doc/web_fetch/exec), Markdown generation with frontmatter, file writing, git sync, dedup, and confirmation replies.
 
-Create `workspace/skills/obsidian-vault.md` with the following content:
+Key skill behaviors:
 
-```markdown
-# Obsidian 知识库
+- Auto-save every incoming message (no command trigger needed)
+- Content type priority: feishu doc > web link > file attachment > text note
+- Frontmatter fields: title, date, source, source_url, sender, tags, type
+- File naming: `YYYY-MM-DD-<slug>.md`
+- Git: add + commit + push after each write, with rebase retry and conflict abort
+- Dedup: check target directory for existing slug before writing
+- Reply: confirm with title or report error
 
-每次收到用户消息时，你必须将内容保存到 Obsidian vault。这是你的核心行为，不需要用户触发。
+Commit: `scripts/committer "feat: add obsidian-vault skill for knowledge management" workspace/skills/obsidian-vault.md`
 
-## Vault 路径
+---
 
-Vault 位于 `~/obsidian-vault/`。所有写入操作使用 `write` 工具，Git 操作使用 `exec` 工具。
+### Task 3: Create Dedicated Agent Workspace
 
-## 处理流程
+**Files:**
 
-收到每条消息后，执行以下步骤：
+- Create: `~/.openclaw/workspace-obsidian-openclaw/skills/` (agent workspace)
+- Modify: `workspace/openclaw.json.example` (config template)
 
-### 1. 识别内容类型
+**Step 1: Create agent workspace and deploy skill**
 
-| 类型     | 判断规则                                         | 目标目录     |
-| -------- | ------------------------------------------------ | ------------ |
-| 飞书文档 | 消息包含 feishu.cn/docx/ 或 feishu.cn/wiki/ 链接 | inbox/docs/  |
-| 网页链接 | 消息包含 http(s):// 链接（非飞书）               | inbox/web/   |
-| 文件附件 | 消息包含已下载的文件路径                         | inbox/files/ |
-| 文字笔记 | 以上都不是                                       | inbox/       |
+```bash
+mkdir -p ~/.openclaw/workspace-obsidian-openclaw/skills
+cp workspace/skills/obsidian-vault.md ~/.openclaw/workspace-obsidian-openclaw/skills/
+```
 
-### 2. 获取内容
+**Step 2: Update `openclaw.json.example`**
 
-- **飞书文档**: 从 URL 中提取 doc_token，调用 `feishu_doc` read 获取内容
-- **网页链接**: 调用 `web_fetch` 获取并提取正文
-- **文件附件**: 用 `exec` 将文件复制到 `~/obsidian-vault/assets/`，笔记中记录文件路径
-- **文字笔记**: 直接使用消息文本
+Add to `agents.list`:
 
-### 3. 分析并生成 Markdown
+```json
+{
+  "id": "obsidian-openclaw",
+  "name": "知识库助手",
+  "workspace": "~/.openclaw/workspace-obsidian-openclaw"
+}
+```
 
-分析内容，生成：
+Add to `bindings`:
 
-- **标题**: 简洁、有意义的标题（中文优先）
-- **标签**: 3-5 个相关标签
-- **正文**: 整理后的 Markdown 内容
+```json
+{
+  "agentId": "obsidian-openclaw",
+  "match": {
+    "channel": "feishu",
+    "account": "obsidian"
+  }
+}
+```
 
-### 4. 写入文件
+Add to `channels.feishu.accounts`:
 
-文件名格式: `YYYY-MM-DD-<slug>.md`（slug 为标题的简短英文/拼音，用连字符分隔）
+```json
+"obsidian": {
+  "appId": "YOUR_OBSIDIAN_BOT_APP_ID",
+  "appSecret": "YOUR_OBSIDIAN_BOT_APP_SECRET"
+}
+```
 
-使用 `write` 工具写入文件，内容格式：
+Commit: `scripts/committer "feat: add obsidian-openclaw agent with dedicated feishu account" workspace/openclaw.json.example`
+
+---
+
+### Task 4: Create Feishu Bot Application (Manual)
+
+This task is done in the Feishu developer console, not in code.
+
+**Step 1: Go to Feishu Open Platform**
+
+Open https://open.feishu.cn/app and log in.
+
+**Step 2: Create new application**
+
+- Click "创建自建应用"
+- App name: `知识库助手`
+- Description: `Obsidian 知识库管理机器人，自动保存消息为笔记`
+
+**Step 3: Enable bot capability**
+
+- Go to "添加应用能力" → enable "机器人"
+
+**Step 4: Configure permissions**
+
+Required scopes:
+
+- `im:message` — receive messages
+- `im:message:send_as_bot` — send replies
+- `contact:user.id:readonly` — resolve sender names
+- `docx:document:readonly` — read Feishu documents (for doc links)
+- `wiki:wiki:readonly` — read Wiki pages (for wiki links)
+
+**Step 5: Configure event subscription**
+
+- Enable WebSocket mode (recommended) or Webhook
+- Subscribe to event: `im.message.receive_v1`
+
+**Step 6: Publish the application**
+
+- Go to "版本管理" → create version → submit for review
+- After approval, the bot is available in Feishu
+
+**Step 7: Record credentials**
+
+Copy `App ID` and `App Secret`, fill into `~/.openclaw/openclaw.json`:
+
+```json
+"obsidian": {
+  "appId": "<paste App ID>",
+  "appSecret": "<paste App Secret>"
+}
 ```
 
 ---
 
-title: "标题"
-date: YYYY-MM-DD
-source: feishu | web | chat | file
-source_url: "原始链接（如有）"
-sender: "发送者名称"
-tags: [标签1, 标签2, 标签3]
-type: doc | note | clip | file
+### Task 5: Deploy and Test End-to-End
 
----
+**Step 1: Update live config**
 
-# 标题
+Edit `~/.openclaw/openclaw.json` with real `appId` and `appSecret` from Task 4.
 
-正文内容...
-
-````
-
-### 5. Git 同步
-
-写入文件后立即执行：
+**Step 2: Restart OpenClaw gateway**
 
 ```bash
-cd ~/obsidian-vault && git add -A && git commit -m "vault: add <type> - <title>" && git push
-````
-
-如果 push 失败，尝试：
-
-```bash
-cd ~/obsidian-vault && git pull --rebase && git push
+# Via Mac app or:
+scripts/restart-mac.sh
 ```
 
-### 6. 确认回复
-
-保存成功后回复: `📝 已保存: <标题>`
-
-如果保存失败，回复: `⚠️ 保存失败: <错误原因>`
-
-## 去重规则
-
-写入前先检查是否已存在相同文件：
+**Step 3: Verify agent is loaded**
 
 ```bash
-ls ~/obsidian-vault/inbox/**/*<slug>* 2>/dev/null
+openclaw channels status --probe
 ```
 
-如果找到同名文件，跳过保存并回复: `📌 已存在: <标题>`
+Expected: feishu channel shows two accounts (`main` + `obsidian`), both connected.
 
-## 注意事项
+**Step 4: Test text message**
 
-- 始终使用 UTF-8 编码
-- frontmatter 中的字符串值用双引号包裹
-- 标签不要包含空格，使用连字符连接多字词
-- 文件附件只保存元信息到笔记，原始文件复制到 assets/
-- 每条消息独立处理，不要合并多条消息
-
-````
-
-**Step 2: Verify skill file syntax**
-
-```bash
-head -5 workspace/skills/obsidian-vault.md
-````
-
-Expected: starts with `# Obsidian 知识库`
-
-**Step 3: Commit**
-
-```bash
-scripts/committer "feat: add obsidian-vault skill for knowledge management" workspace/skills/obsidian-vault.md
-```
-
----
-
-### Task 3: Test the Skill End-to-End
-
-This is a manual verification task. Run these checks on the machine where OpenClaw + Feishu agent is running.
-
-**Step 1: Ensure vault is initialized (Task 1)**
-
-```bash
-ls ~/obsidian-vault/inbox/ && git -C ~/obsidian-vault status
-```
-
-Expected: directories exist, clean git working tree.
-
-**Step 2: Restart the OpenClaw gateway to pick up the new skill**
-
-Follow the standard restart procedure for the Feishu agent.
-
-**Step 3: Send a test text message via Feishu**
-
-Send: `测试知识库保存：这是一条测试笔记`
+In Feishu, find "知识库助手" bot and send: `测试知识库保存：这是一条测试笔记`
 
 Expected:
 
-- Agent replies: `📝 已保存: 测试笔记` (or similar)
-- File created at `~/obsidian-vault/inbox/YYYY-MM-DD-test-note.md`
+- Bot replies: `📝 已保存: 测试笔记` (or similar)
+- File created at `~/obsidian-vault/inbox/YYYY-MM-DD-<slug>.md`
 - Git commit and push completed
 
-**Step 4: Verify the saved note**
+**Step 5: Verify saved note**
 
 ```bash
 ls ~/obsidian-vault/inbox/*.md
-cat ~/obsidian-vault/inbox/$(ls -t ~/obsidian-vault/inbox/*.md | head -1)
+cat "$(ls -t ~/obsidian-vault/inbox/*.md | head -1)"
 git -C ~/obsidian-vault log --oneline -3
 ```
 
-Expected: note with frontmatter, pushed to GitHub.
+**Step 6: Test Feishu doc link**
 
-**Step 5: Test Feishu doc link**
+Send a Feishu doc URL to the bot. Verify it reads the doc and saves to `inbox/docs/`.
 
-Send a Feishu doc URL via Feishu. Verify it reads the doc and saves to `inbox/docs/`.
-
-**Step 6: Test web link**
+**Step 7: Test web link**
 
 Send a web URL. Verify it fetches and saves to `inbox/web/`.
 
-**Step 7: Test dedup**
+**Step 8: Test dedup**
 
 Send the same content again. Expected: `📌 已存在` response, no duplicate file.
 
-**Step 8: Verify on GitHub**
+**Step 9: Verify on GitHub**
 
-Check the GitHub repo page to confirm all notes are pushed.
-
----
-
-### Task 4: Document Setup in Agent Config (Optional)
-
-If the Feishu agent uses a dedicated workspace, ensure the skill is accessible.
-
-**Step 1: Check current agent workspace config**
-
-```bash
-cat workspace/openclaw.json.example | grep -A5 feixiaozhu
-```
-
-**Step 2: If the agent workspace is separate from the repo workspace**
-
-Copy or symlink the skill:
-
-```bash
-# If agent workspace is at ~/.openclaw/workspace-feixiaozhu
-cp workspace/skills/obsidian-vault.md ~/.openclaw/workspace-feixiaozhu/skills/
-```
-
-Or add the repo skills directory to the agent's skill load path in config.
-
-**Step 3: Commit any config changes**
-
-```bash
-scripts/committer "docs: add obsidian-vault skill setup notes" <changed-files>
-```
+Check the GitHub repo to confirm all notes are pushed.
