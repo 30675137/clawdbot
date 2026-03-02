@@ -10,6 +10,7 @@ services:
     restart: unless-stopped
     volumes:
       - /Volumes/macpro_data/openclaw_data/obsidian-openclaw:/home/node/.openclaw
+      - /Volumes/macpro_data/知识库/数字助理知识库:/home/node/obsidian-vault
     environment:
       - HOME=/home/node
       - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
