@@ -19,10 +19,12 @@ Vault 位于 `~/obsidian-vault/`。所有写入操作使用 `write` 工具，Git
 | 文件附件 | 消息包含已下载的文件路径                         | inbox/files/ |
 | 文字笔记 | 以上都不是                                       | inbox/       |
 
+**优先级规则：** 如果消息同时包含多种内容类型，按表格从上到下的优先级处理，只选择最高优先级的类型。例如：消息同时包含飞书文档链接和网页链接时，只处理飞书文档。
+
 ### 2. 获取内容
 
-- **飞书文档**: 从 URL 中提取 doc_token，调用 `feishu_doc` read 获取内容
-- **网页链接**: 调用 `web_fetch` 获取并提取正文
+- **飞书文档**: 从 URL 中提取 doc_token（如 `https://xxx.feishu.cn/docx/ABC123def` → token 为 `ABC123def`），调用 `feishu_doc` 的 `read` action 获取内容。如果读取失败，保存链接并注明：⚠️ 无法读取文档内容
+- **网页链接**: 调用 `web_fetch` 获取网页内容，提取正文（去除导航、广告等无关元素）
 - **文件附件**: 用 `exec` 将文件复制到 `~/obsidian-vault/assets/`，笔记中记录文件路径
 - **文字笔记**: 直接使用消息文本
 
@@ -70,6 +72,8 @@ cd ~/obsidian-vault && git add -A && git commit -m "vault: add <type> - <title>"
 cd ~/obsidian-vault && git pull --rebase && git push
 ```
 
+如果 rebase 出现冲突，执行 `git rebase --abort` 并回复用户：⚠️ Git 同步冲突，请手动解决。
+
 ### 6. 确认回复
 
 保存成功后回复: 📝 已保存: <标题>
@@ -78,10 +82,10 @@ cd ~/obsidian-vault && git pull --rebase && git push
 
 ## 去重规则
 
-写入前先检查是否已存在相同文件：
+写入前先检查目标目录中是否已存在相同 slug 的文件：
 
 ```
-ls ~/obsidian-vault/inbox/**/*<slug>* 2>/dev/null
+ls ~/obsidian-vault/<目标目录>/*<slug>* 2>/dev/null
 ```
 
 如果找到同名文件，跳过保存并回复: 📌 已存在: <标题>
