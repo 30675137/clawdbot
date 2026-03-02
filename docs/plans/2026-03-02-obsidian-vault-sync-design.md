@@ -12,7 +12,24 @@ Feishu message → OpenClaw Feishu Agent → obsidian-vault Skill → Local Vaul
 
 ## Approach
 
-**Skill-based** (vs. Plugin or MCP Server): a `.md` skill file loaded into the Feishu agent's system prompt. Claude handles content analysis, tag extraction, and Markdown formatting natively.
+**Dedicated agent + skill**: A standalone OpenClaw agent (`obsidian-openclaw`, "知识库助手") with its own Feishu bot application and workspace (`~/.openclaw/workspace-obsidian-openclaw/`). The agent loads an `obsidian-vault` skill that handles content analysis, Markdown formatting, and Git sync.
+
+**Why a separate agent:**
+
+- Clean separation from the general-purpose `feixiaozhu` agent
+- Dedicated Feishu bot — users add "知识库助手" to send knowledge items
+- Independent workspace, skills, and session history
+- Can use a different model or config without affecting other agents
+
+**Architecture:**
+
+```
+Feishu Bot "知识库助手" (account: obsidian)
+  → OpenClaw Gateway (binding: channel=feishu, account=obsidian)
+    → Agent: obsidian-openclaw (workspace: ~/.openclaw/workspace-obsidian-openclaw/)
+      → Skill: obsidian-vault.md
+        → Write to ~/obsidian-vault/ → git push → GitHub
+```
 
 ## Supported Content Types
 
@@ -78,11 +95,46 @@ vault: add <type> - <title>
 
 ## Configuration
 
-Stored in agent config or workspace.json:
+In `openclaw.json`:
 
-- `vault_path`: local Obsidian vault path
+```jsonc
+{
+  "agents": {
+    "list": [
+      // ... existing agents ...
+      {
+        "id": "obsidian-openclaw",
+        "name": "知识库助手",
+        "workspace": "~/.openclaw/workspace-obsidian-openclaw",
+      },
+    ],
+  },
+  "bindings": [
+    // ... existing bindings ...
+    {
+      "agentId": "obsidian-openclaw",
+      "match": { "channel": "feishu", "account": "obsidian" },
+    },
+  ],
+  "channels": {
+    "feishu": {
+      "accounts": {
+        // ... existing accounts ...
+        "obsidian": {
+          "appId": "YOUR_OBSIDIAN_BOT_APP_ID",
+          "appSecret": "YOUR_OBSIDIAN_BOT_APP_SECRET",
+        },
+      },
+    },
+  },
+}
+```
+
+Vault config (stored in agent workspace or skill):
+
+- `vault_path`: `~/obsidian-vault/`
 - `git_remote`: GitHub remote URL
-- `git_branch`: branch name (default: `main`)
+- `git_branch`: `main`
 
 ## Edge Cases
 
@@ -101,7 +153,10 @@ Stored in agent config or workspace.json:
 
 ## Initialization Steps
 
-1. Create vault directory with `.obsidian/` config
-2. `git init` → create GitHub repo → add remote → initial push
-3. Configure `vault_path` in Feishu agent config
-4. Load `obsidian-vault` skill into agent
+1. Create a new Feishu bot application in Feishu developer console ("知识库助手")
+2. Create vault directory with `.obsidian/` config
+3. `git init` → create GitHub repo → add remote → initial push
+4. Create agent workspace: `~/.openclaw/workspace-obsidian-openclaw/skills/`
+5. Place `obsidian-vault` skill in the workspace skills directory
+6. Add agent, binding, and feishu account to `openclaw.json`
+7. Restart OpenClaw gateway
