@@ -1,0 +1,28 @@
+# Docker Compose for PM Assistant (pm-assistant)
+# Usage: docker compose -f docker-compose.pm-assistant.yml up -d
+
+name: openclaw-pm-assistant
+
+services:
+  openclaw-gateway:
+    build: .
+    container_name: openclaw-pm-assistant
+    env_file:
+      - .env.pm-assistant
+    restart: unless-stopped
+    volumes:
+      - /Volumes/macpro_data/openclaw_data/pm-assistant:/home/node/.openclaw
+    environment:
+      - HOME=/home/node
+    ports:
+      - "${PM_GATEWAY_PORT:-18791}:18791"
+    command:
+      [
+        "node",
+        "openclaw.mjs",
+        "gateway",
+        "--bind",
+        "lan",
+        "--port",
+        "18791",
+      ]
