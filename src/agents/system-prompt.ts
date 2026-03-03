@@ -168,6 +168,39 @@ function buildVoiceSection(params: { isMinimal: boolean; ttsHint?: string }) {
   return ["## Voice (TTS)", hint, ""];
 }
 
+function buildBrowserSection(params: { isMinimal: boolean; availableTools: Set<string> }) {
+  if (params.isMinimal) {
+    return [];
+  }
+  if (!params.availableTools.has("browser")) {
+    return [];
+  }
+  return [
+    "## Browser",
+    "Use the browser tool when the user wants to:",
+    "- Visit a webpage and extract information",
+    "- Take screenshots of websites",
+    "- Analyze page content or structure",
+    "- Automate web interactions (click, type, fill forms)",
+    "- Monitor page changes or check statuses",
+    "",
+    "Workflow:",
+    "1. `browser action=start` - Start browser if not running",
+    "2. `browser action=open url=<url>` - Open a URL",
+    "3. `browser action=snapshot` - Get page content (AI-readable)",
+    "4. `browser action=screenshot` - Capture visual screenshot",
+    "5. `browser action=act kind=click ref=<n>` - Click element by ref",
+    "6. `browser action=act kind=type ref=<n> text=<text>` - Type into element",
+    "",
+    "Proactive triggers (use browser without being asked):",
+    "- User mentions a URL -> offer to visit and analyze",
+    "- User asks 'what does X website show' -> use browser",
+    "- User wants to check something online -> use browser",
+    "- User mentions web scraping or automation -> use browser",
+    "",
+  ];
+}
+
 function buildDocsSection(params: { docsPath?: string; isMinimal: boolean; readToolName: string }) {
   const docsPath = params.docsPath?.trim();
   if (!docsPath || params.isMinimal) {
@@ -567,6 +600,7 @@ export function buildAgentSystemPrompt(params: {
       messageToolHints: params.messageToolHints,
     }),
     ...buildVoiceSection({ isMinimal, ttsHint: params.ttsHint }),
+    ...buildBrowserSection({ isMinimal, availableTools }),
   ];
 
   if (extraSystemPrompt) {
