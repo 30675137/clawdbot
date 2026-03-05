@@ -87,7 +87,8 @@ describe("directive behavior", () => {
     storePath: string;
   }) {
     const text = Array.isArray(params.response) ? params.response[0]?.text : params.response?.text;
-    expect(text).toContain("Model set to moonshot/kimi-k2-0905-preview.");
+    expect(text).toContain("Model set to");
+    expect(text).toContain("moonshot/kimi-k2-0905-preview");
     assertModelSelection(params.storePath, {
       provider: "moonshot",
       model: "kimi-k2-0905-preview",

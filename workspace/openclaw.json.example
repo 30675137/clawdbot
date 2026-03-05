@@ -1,0 +1,78 @@
+// OpenClaw Gateway Configuration for 飞小助 (feixiaozhu)
+// Copy this file to ~/.openclaw/openclaw.json (inside container: /home/node/.openclaw/openclaw.json)
+// Or mount it via docker volume
+{
+  "gateway": {
+    "mode": "local"
+  },
+  "models": {
+    "providers": {
+      "dashscope": {
+        "baseUrl": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "apiKey": "YOUR_DASHSCOPE_API_KEY",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen-plus",
+            "name": "Qwen Plus"
+          }
+        ]
+      },
+      "anthropic": {
+        "baseUrl": "YOUR_ANTHROPIC_BASE_URL",
+        "apiKey": "YOUR_ANTHROPIC_API_KEY",
+        "models": [
+          {
+            "id": "claude-sonnet-4-6",
+            "name": "Claude Sonnet"
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "dashscope/qwen-plus",
+      "models": {
+        "dashscope/qwen-plus": {},
+        "anthropic/claude-sonnet-4-6": {}
+      }
+    },
+    "list": [
+      {
+        "id": "feixiaozhu",
+        "name": "飞小助",
+        "workspace": "~/.openclaw/workspace-feixiaozhu"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "feixiaozhu",
+      "match": {
+        "channel": "feishu"
+      }
+    }
+  ],
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "dmPolicy": "open",
+      "groupPolicy": "open",
+      "requireMention": true,
+      "accounts": {
+        "main": {
+          "appId": "YOUR_FEISHU_APP_ID",
+          "appSecret": "YOUR_FEISHU_APP_SECRET"
+        }
+      },
+      "tools": {
+        "doc": true,
+        "wiki": true,
+        "drive": true,
+        "perm": false,
+        "scopes": true
+      }
+    }
+  }
+}

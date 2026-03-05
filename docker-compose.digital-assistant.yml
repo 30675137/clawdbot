@@ -1,0 +1,29 @@
+# Docker Compose for 飞小助 (feixiaozhu)
+# Usage: docker compose -f docker-compose.digital-assistant.yml up -d
+
+name: openclaw-feixiaozhu
+
+services:
+  openclaw-gateway:
+    build: .
+    container_name: openclaw-feixiaozhu
+    env_file:
+      - .env
+      - .env.feixiaozhu
+    restart: unless-stopped
+    volumes:
+      - /Volumes/macpro_data/openclaw_data/feixiaozhu:/home/node/.openclaw
+    environment:
+      - HOME=/home/node
+    ports:
+      - "${GATEWAY_PORT:-18789}:18789"
+    command:
+      [
+        "node",
+        "openclaw.mjs",
+        "gateway",
+        "--bind",
+        "lan",
+        "--port",
+        "18789",
+      ]

@@ -241,6 +241,69 @@ describe("model-selection", () => {
     });
   });
 
+  describe("buildModelAliasIndex auto-aliases", () => {
+    it("auto-generates alias from model ID when no explicit alias is set", () => {
+      const cfg = {
+        agents: {
+          defaults: {
+            models: {
+              "dashscope/qwen-plus": {}, // no alias field
+            },
+          },
+        },
+      };
+      const index = buildModelAliasIndex({
+        cfg: cfg as OpenClawConfig,
+        defaultProvider: "anthropic",
+      });
+      const match = index.byAlias.get("qwen-plus");
+      expect(match).toBeDefined();
+      expect(match?.ref.provider).toBe("dashscope");
+      expect(match?.ref.model).toBe("qwen-plus");
+    });
+
+    it("does not overwrite an explicit alias", () => {
+      const cfg = {
+        agents: {
+          defaults: {
+            models: {
+              "dashscope/qwen-plus": { alias: "qw" },
+            },
+          },
+        },
+      };
+      const index = buildModelAliasIndex({
+        cfg: cfg as OpenClawConfig,
+        defaultProvider: "anthropic",
+      });
+      expect(index.byAlias.has("qw")).toBe(true);
+      // Auto-alias should still be generated as a secondary alias
+      expect(index.byAlias.has("qwen-plus")).toBe(true);
+    });
+
+    it("prefixes with provider when model IDs collide across providers", () => {
+      const cfg = {
+        agents: {
+          defaults: {
+            models: {
+              "provider-a/chat": {},
+              "provider-b/chat": {},
+            },
+          },
+        },
+      };
+      const index = buildModelAliasIndex({
+        cfg: cfg as OpenClawConfig,
+        defaultProvider: "anthropic",
+      });
+      // "chat" alone is ambiguous, so both should get provider-prefixed aliases
+      expect(index.byAlias.has("provider-a-chat")).toBe(true);
+      expect(index.byAlias.has("provider-b-chat")).toBe(true);
+      // The bare "chat" should NOT be registered (ambiguous)
+      expect(index.byAlias.has("chat")).toBe(false);
+    });
+  });
+
   describe("buildAllowedModelSet", () => {
     it("keeps explicitly allowlisted models even when missing from bundled catalog", () => {
       const cfg: OpenClawConfig = {

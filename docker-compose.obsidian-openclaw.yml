@@ -1,0 +1,29 @@
+# Docker Compose for 知识库助手 (obsidian-openclaw)
+# Usage: docker compose -f docker-compose.obsidian-openclaw.yml up -d
+
+name: openclaw-obsidian-openclaw
+
+services:
+  openclaw-gateway:
+    build: .
+    container_name: openclaw-obsidian-openclaw
+    env_file:
+      - .env
+      - .env.obsidian-openclaw
+    restart: unless-stopped
+    volumes:
+      - /Volumes/macpro_data/openclaw_data/obsidian-openclaw:/home/node
+    environment:
+      - HOME=/home/node
+    ports:
+      - "${OBSIDIAN_GATEWAY_PORT:-18790}:18790"
+    command:
+      [
+        "node",
+        "openclaw.mjs",
+        "gateway",
+        "--bind",
+        "lan",
+        "--port",
+        "18790",
+      ]

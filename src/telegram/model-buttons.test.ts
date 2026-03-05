@@ -3,6 +3,7 @@ import {
   buildModelsKeyboard,
   buildProviderKeyboard,
   buildBrowseProvidersButton,
+  buildQuickPickKeyboard,
   calculateTotalPages,
   getModelsPageSize,
   parseModelCallbackData,
@@ -240,6 +241,38 @@ describe("calculateTotalPages", () => {
   it("uses custom page size", () => {
     expect(calculateTotalPages(10, 5)).toBe(2);
     expect(calculateTotalPages(11, 5)).toBe(3);
+  });
+});
+
+describe("buildQuickPickKeyboard", () => {
+  it("builds buttons for configured models", () => {
+    const rows = buildQuickPickKeyboard({
+      models: [
+        { provider: "dashscope", model: "qwen-plus", name: "Qwen Plus" },
+        { provider: "anthropic", model: "claude-opus-4-6", name: "Claude Opus" },
+      ],
+      currentModel: "dashscope/qwen-plus",
+    });
+    expect(rows.length).toBeGreaterThanOrEqual(1);
+    const allButtons = rows.flat();
+    const qwenBtn = allButtons.find((b) => b.callback_data.includes("qwen-plus"));
+    expect(qwenBtn?.text).toContain("✓");
+    const claudeBtn = allButtons.find((b) => b.callback_data.includes("claude-opus"));
+    expect(claudeBtn?.text).not.toContain("✓");
+  });
+
+  it("returns empty array when no models provided", () => {
+    const rows = buildQuickPickKeyboard({ models: [], currentModel: undefined });
+    expect(rows).toEqual([]);
+  });
+
+  it("uses mdl_sel_ callback data format", () => {
+    const rows = buildQuickPickKeyboard({
+      models: [{ provider: "dashscope", model: "qwen-plus", name: "Qwen Plus" }],
+      currentModel: undefined,
+    });
+    const btn = rows.flat()[0];
+    expect(btn?.callback_data).toBe("mdl_sel_dashscope/qwen-plus");
   });
 });
 

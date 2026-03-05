@@ -1,0 +1,150 @@
+{
+  "_comment": "PM Assistant Feishu App Permissions - Batch Import",
+  "_instructions": "将此 JSON 上传到飞书开发者后台权限管理页面（如支持），或按照 scopes 中的权限逐个搜索并勾选。开通后需创建新版本并发布才能生效。",
+  "_appId": "cli_a92c374691385bce",
+  "_appName": "PM Assistant",
+  "scopes": {
+    "tenant": [
+      {
+        "scope": "im:message",
+        "category": "必需",
+        "description": "接收和读取消息"
+      },
+      {
+        "scope": "im:message:send_as_bot",
+        "category": "必需",
+        "description": "以机器人身份发送消息"
+      },
+      {
+        "scope": "im:message:send",
+        "category": "必需",
+        "description": "发送消息"
+      },
+      {
+        "scope": "im:message.reactions:write_only",
+        "category": "必需",
+        "description": "添加消息反应（表情）"
+      },
+      {
+        "scope": "im:chat",
+        "category": "推荐",
+        "description": "读取群组信息"
+      },
+      {
+        "scope": "im:chat:readonly",
+        "category": "推荐",
+        "description": "群组只读访问"
+      },
+      {
+        "scope": "contact:contact.base:readonly",
+        "category": "推荐",
+        "description": "获取联系人基本信息（发送者名称）"
+      },
+      {
+        "scope": "contact:contact:access_as_app",
+        "category": "推荐",
+        "description": "作为应用访问联系人"
+      },
+      {
+        "scope": "contact:contact:readonly",
+        "category": "推荐",
+        "description": "联系人只读访问"
+      },
+      {
+        "scope": "contact:contact:readonly_as_app",
+        "category": "推荐",
+        "description": "作为应用只读访问联系人"
+      },
+      {
+        "scope": "contact:user.id:readonly",
+        "category": "推荐",
+        "description": "用户ID只读访问"
+      },
+      {
+        "scope": "cardkit:card:write",
+        "category": "可选",
+        "description": "发送卡片消息（结构化反馈）"
+      },
+      {
+        "scope": "drive:drive",
+        "category": "可选",
+        "description": "云文档读写（用于上传/下载需求文档）"
+      },
+      {
+        "scope": "drive:drive:readonly",
+        "category": "可选",
+        "description": "云文档只读访问"
+      },
+      {
+        "scope": "docx:document",
+        "category": "可选",
+        "description": "文档读写（word文档）"
+      },
+      {
+        "scope": "docx:document:readonly",
+        "category": "可选",
+        "description": "文档只读访问"
+      },
+      {
+        "scope": "wiki:wiki",
+        "category": "可选",
+        "description": "知识库读写"
+      },
+      {
+        "scope": "wiki:wiki:readonly",
+        "category": "可选",
+        "description": "知识库只读访问"
+      },
+      {
+        "scope": "bitable:bitable",
+        "category": "可选",
+        "description": "多维表格读写（requirements-gateway 需要）"
+      },
+      {
+        "scope": "bitable:bitable:readonly",
+        "category": "可选",
+        "description": "多维表格只读访问"
+      },
+      {
+        "scope": "bitable:app:readonly",
+        "category": "可选",
+        "description": "多维表格应用只读"
+      },
+      {
+        "scope": "application:application.app_version:readonly",
+        "category": "可选",
+        "description": "应用版本信息只读"
+      }
+    ],
+    "user": [
+      {
+        "scope": "docx:document:readonly",
+        "category": "可选",
+        "description": "用户维度的文档只读"
+      },
+      {
+        "scope": "wiki:wiki:readonly",
+        "category": "可选",
+        "description": "用户维度的知识库只读"
+      },
+      {
+        "scope": "drive:drive:readonly",
+        "category": "可选",
+        "description": "用户维度的云文档只读"
+      }
+    ]
+  },
+  "_categories": {
+    "必需": "不勾选机器人无法接收和回复消息",
+    "推荐": "勾选可获得完整功能（显示发送者信息等）",
+    "可选": "根据需要开通（云文档/多维表格等高级功能）"
+  },
+  "_steps": [
+    "1. 打开飞书开发者后台：https://open.feishu.cn/app/cli_a92c374691385bce/",
+    "2. 点击『权限管理』",
+    "3. 逐个搜索上述 scope 名称，勾选对应权限",
+    "4. 完成后，点击『创建新版本』",
+    "5. 发布新版本（重要！权限才能生效）",
+    "6. 返回 PM Assistant 容器，重新发送消息测试"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "gateway": {
+    "mode": "local"
+  },
+  "models": {
+    "providers": {
+      "anthropic": {
+        "models": [
+          {
+            "id": "claude-opus-4-6",
+            "name": "Claude Opus"
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-opus-4-6",
+      "thinkingDefault": "medium",
+      "models": {
+        "anthropic/claude-opus-4-6": {}
+      }
+    },
+    "list": [
+      {
+        "id": "pm-assistant",
+        "name": "PM Assistant",
+        "workspace": "~/.openclaw/workspace-pm-assistant"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "pm-assistant",
+      "match": {
+        "channel": "feishu"
+      }
+    }
+  ],
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "dmPolicy": "open",
+      "groupPolicy": "open",
+      "requireMention": true,
+      "accounts": {
+        "main": {
+          "appId": "YOUR_FEISHU_APP_ID",
+          "appSecret": "YOUR_FEISHU_APP_SECRET"
+        }
+      },
+      "tools": {
+        "doc": true,
+        "wiki": true,
+        "drive": true,
+        "perm": false,
+        "scopes": true
+      }
+    }
+  }
+}

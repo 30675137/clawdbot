@@ -125,6 +125,16 @@ export function registerModelsCli(program: Command) {
     });
 
   models
+    .command("use")
+    .description("Switch the default model (alias for set)")
+    .argument("<model>", "Model id or alias")
+    .action(async (model: string) => {
+      await runModelsCommand(async () => {
+        await modelsSetCommand(model, defaultRuntime);
+      });
+    });
+
+  models
     .command("set-image")
     .description("Set the image model")
     .argument("<model>", "Model id or alias")
