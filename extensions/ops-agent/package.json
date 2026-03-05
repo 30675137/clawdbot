@@ -2,6 +2,9 @@
   "name": "@openclaw/ops-agent",
   "version": "1.0.0",
   "description": "OpenClaw operations automation agent",
+  "bin": {
+    "ops-agent": "dist/cli.js"
+  },
   "type": "module",
   "main": "dist/index.js",
   "exports": {
@@ -10,6 +13,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "start": "node dist/cli.js",
     "test": "vitest"
   },
   "dependencies": {
