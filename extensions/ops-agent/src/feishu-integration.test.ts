@@ -1,16 +1,22 @@
 // extensions/ops-agent/src/feishu-integration.test.ts
 
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { FeishuOpsAgent } from "./feishu-integration.js";
 
 describe("FeishuOpsAgent", () => {
-  const agent = new FeishuOpsAgent(2);
+  const config = {
+    appId: "cli_test",
+    appSecret: "test_secret",
+  };
+
+  const agent = new FeishuOpsAgent(config, 2);
 
   it("should handle valid command message", async () => {
     const message = {
-      userId: "user123",
-      text: "status",
-      timestamp: new Date().toISOString(),
+      sender: { id: "user123" },
+      text: { content: "status" },
+      chat_id: "chat123",
+      timestamp: Date.now(),
     };
 
     const reply = await agent.handleMessage(message);
@@ -21,9 +27,10 @@ describe("FeishuOpsAgent", () => {
 
   it("should handle invalid command message", async () => {
     const message = {
-      userId: "user123",
-      text: "invalid-command-xyz",
-      timestamp: new Date().toISOString(),
+      sender: { id: "user123" },
+      text: { content: "invalid-command-xyz" },
+      chat_id: "chat123",
+      timestamp: Date.now(),
     };
 
     const reply = await agent.handleMessage(message);
@@ -34,9 +41,10 @@ describe("FeishuOpsAgent", () => {
 
   it("should track job status", async () => {
     const message = {
-      userId: "user123",
-      text: "diagnose",
-      timestamp: new Date().toISOString(),
+      sender: { id: "user123" },
+      text: { content: "diagnose" },
+      chat_id: "chat123",
+      timestamp: Date.now(),
     };
 
     const reply = await agent.handleMessage(message);
@@ -46,14 +54,20 @@ describe("FeishuOpsAgent", () => {
 
   it("should get job record", async () => {
     const message = {
-      userId: "user123",
-      text: "config get gateway.mode",
-      timestamp: new Date().toISOString(),
+      sender: { id: "user123" },
+      text: { content: "config get gateway.mode" },
+      chat_id: "chat123",
+      timestamp: Date.now(),
     };
 
     const reply = await agent.handleMessage(message);
     const record = agent.getJobRecord(reply.jobId);
     expect(record).toBeDefined();
     expect(record?.command.userId).toBe("user123");
+  });
+
+  it("should expose Lark client", () => {
+    const client = agent.getClient();
+    expect(client).toBeDefined();
   });
 });
