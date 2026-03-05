@@ -1,0 +1,55 @@
+{
+  "gateway": {
+    "mode": "local"
+  },
+  "models": {
+    "providers": {
+      "anthropic": {
+        "models": [
+          {
+            "id": "claude-opus-4-6",
+            "name": "Claude Opus"
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-opus-4-6",
+      "thinkingDefault": "medium",
+      "models": {
+        "anthropic/claude-opus-4-6": {}
+      }
+    },
+    "list": [
+      {
+        "id": "ops-agent",
+        "name": "Ops Agent",
+        "workspace": "~/.openclaw/workspace-ops-agent"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "ops-agent",
+      "match": {
+        "channel": "feishu"
+      }
+    }
+  ],
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "dmPolicy": "open",
+      "groupPolicy": "open",
+      "requireMention": true,
+      "accounts": {
+        "main": {
+          "appId": "cli_a9235e9f52745bce",
+          "appSecret": "qDo2JBsYaIf3kUCXAzOcVgfLRw4UI8xN"
+        }
+      }
+    }
+  }
+}
