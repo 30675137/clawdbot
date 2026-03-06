@@ -1,0 +1,59 @@
+{
+  "gateway": {
+    "mode": "local"
+  },
+  "models": {
+    "providers": {
+      "anthropic": {
+        "models": [
+          {
+            "id": "claude-opus-4-6",
+            "name": "Claude Opus"
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-opus-4-6",
+      "thinkingDefault": "medium",
+      "models": {
+        "anthropic/claude-opus-4-6": {}
+      }
+    },
+    "list": [
+      {
+        "id": "ra-assistant",
+        "name": "RA Assistant",
+        "workspace": "~/.openclaw/workspace-ra-assistant"
+      }
+    ]
+  },
+  "bindings": [
+    {
+      "agentId": "ra-assistant",
+      "match": {
+        "channel": "feishu"
+      }
+    }
+  ],
+  "channels": {
+    "feishu": {
+      "enabled": true,
+      "dmPolicy": "open",
+      "groupPolicy": "open",
+      "requireMention": true,
+      "accounts": {
+        "main": {
+          "appId": "cli_a920e4548479dbb4",
+          "appSecret": "z8c27X3YgeJ2Oxhkzr2tVfpEdsGQkNUj"
+        }
+      },
+      "tools": {
+        "doc": true,
+        "wiki": true
+      }
+    }
+  }
+}
